@@ -44,6 +44,7 @@ export class Bamboo extends PluginBase.PluginBase {
         if(state == 'successful') {
             return PluginBase.PollResultStatus.SUCCESS;
         }
+        console.error("unknown bamboo state:", state);
         return PluginBase.PollResultStatus.FAILURE;
     }
 }

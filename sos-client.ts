@@ -8,7 +8,7 @@ import sos = module('sos-device');
 import PluginBase = module('plugin');
 import Bamboo = module('plugins/bamboo');
 
-var useMockDevice: boolean = true;
+var useMockDevice: boolean = false;
 
 interface ConfigBuild {
     name: string;
@@ -43,6 +43,9 @@ function poll(callback: (err?: Error) => void, startupData: StartupData): void {
     startupData.config.builds.forEach((build) => {
        build.interval = build.interval || 30000;
        build.name = build.name || (build.type + (nameId++));
+       build.lastPollResult = build.lastPollResult || {
+           status: PluginBase.PollResultStatus.SUCCESS
+       };
        switch(build.type) {
            case 'bamboo':
                build.plugin = new Bamboo.Bamboo();
@@ -62,9 +65,11 @@ function pollBuild(build: ConfigBuild, startupData: StartupData): void {
             console.error('Failed to poll: ' + build.name, err);
         }
         if(pollResult) {
-            build.lastPollResult = pollResult;
-            console.log('New poll results:', pollResult);
-            updateSiren(startupData.sosDevice, startupData.sosDeviceInfo, build.lastPollResult);
+            if(pollResult.status != build.lastPollResult.status) {
+                build.lastPollResult = pollResult;
+                console.log('New poll results:', pollResult);
+                updateSiren(startupData.sosDevice, startupData.sosDeviceInfo, build.lastPollResult);
+            }
         }
         setTimeout(pollBuild.bind(null, build, startupData), build.interval);
     });
@@ -74,10 +79,11 @@ function updateSiren(sosDevice: SosDevice, sosDeviceInfo: SosDeviceAllInfo, poll
     if(pollResult.status == PluginBase.PollResultStatus.FAILURE) {
         var controlPacket: SosDeviceControlPacket = {
             audioMode: sosDeviceInfo.audioPatterns[0].id,
-            audioPlayDuration: 500,
+            audioPlayDuration: 1000,
             ledMode: sosDeviceInfo.ledPatterns[0].id,
-            ledPlayDuration: 500,
+            ledPlayDuration: 5000,
         };
+        console.log(controlPacket);
         sosDevice.sendControlPacket(controlPacket, function(err?) {
             if(err) {
                 console.error("Could not send SoS control packet", err);
@@ -85,11 +91,12 @@ function updateSiren(sosDevice: SosDevice, sosDeviceInfo: SosDeviceAllInfo, poll
         });
     } else if(pollResult.status == PluginBase.PollResultStatus.SUCCESS) {
         var controlPacket: SosDeviceControlPacket = {
-            audioMode: sosDeviceInfo.audioPatterns[0].id,
-            audioPlayDuration: 100,
+            audioMode: sosDeviceInfo.audioPatterns[1].id,
+            audioPlayDuration: 500,
             ledMode: sosDeviceInfo.ledPatterns[0].id,
-            ledPlayDuration: 100,
+            ledPlayDuration: 500,
         };
+        console.log(controlPacket);
         sosDevice.sendControlPacket(controlPacket, function(err?) {
             if(err) {
                 console.error("Could not send SoS control packet", err);
@@ -172,7 +179,13 @@ function connectToDevice(callback: (err: Error, sosDevice?: SosDevice) => void):
 }
 
 function getSosDeviceInfo(callback: (err?: Error, sosDeviceInfo?: SosDeviceAllInfo) => void, startupData: StartupData): void {
-    return startupData.sosDevice.readAllInfo(callback);  
+    return startupData.sosDevice.readAllInfo(function(err?, deviceInfo?) {
+        if(err) {
+            return callback(err);
+        }
+        console.log("deviceInfo:", deviceInfo);
+        return callback(null, deviceInfo);
+    });  
 }
 
 run(function(err) {

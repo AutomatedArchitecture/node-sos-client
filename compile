@@ -1,0 +1,3 @@
+
+tsc --out build sos-client.ts
+
