@@ -1,0 +1,9 @@
+/build/*
+node_modules
+*.node
+*.sh
+*.swp
+.lock*
+npm-debug.log
+.idea
+config.json

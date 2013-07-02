@@ -1,0 +1,12 @@
+{
+  "builds": [
+    {
+      "type": "bamboo",
+      "config": {
+        "url": "https://bamboo.example.com/rest/api/latest/result/BUILDNAME-BUILDPLAN.json?max-results=1",
+        "username": "<username>",
+        "password": "<password>"
+      }
+    }
+  ]
+}
