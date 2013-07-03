@@ -6,6 +6,7 @@ import PluginBase = module('../plugin');
 
 interface BambooResult {
     state: string;
+    id: number;
 }
 
 interface BambooResults {
@@ -32,7 +33,8 @@ export class Bamboo extends PluginBase.PluginBase {
             if(bambooResp.results.result.length > 0) {
                 var status = bambooResp.results.result[0];
                 return callback(null, {
-                   status: this.toPollResultStatus(status.state) 
+                   status: this.toPollResultStatus(status.state),
+                   id: status.id
                 });
             }
             return callback();

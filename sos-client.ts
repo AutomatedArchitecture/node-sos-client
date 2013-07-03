@@ -44,7 +44,8 @@ function poll(callback: (err?: Error) => void, startupData: StartupData): void {
        build.interval = build.interval || 30000;
        build.name = build.name || (build.type + (nameId++));
        build.lastPollResult = build.lastPollResult || {
-           status: PluginBase.PollResultStatus.SUCCESS
+           status: PluginBase.PollResultStatus.SUCCESS,
+           id: 0
        };
        switch(build.type) {
            case 'bamboo':
@@ -65,7 +66,8 @@ function pollBuild(build: ConfigBuild, startupData: StartupData): void {
             console.error('Failed to poll: ' + build.name, err);
         }
         if(pollResult) {
-            if(pollResult.status != build.lastPollResult.status) {
+            if(pollResult.status != build.lastPollResult.status 
+              || pollResult.id != build.lastPollResult.id) {
                 build.lastPollResult = pollResult;
                 console.log('New poll results:', pollResult);
                 updateSiren(startupData.sosDevice, startupData.sosDeviceInfo, build.lastPollResult);

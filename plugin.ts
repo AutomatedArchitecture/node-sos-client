@@ -6,6 +6,7 @@ export enum PollResultStatus {
 
 export interface PollResult {
     status: PollResultStatus;
+    id: number;
 }
 
 export class PluginBase {
