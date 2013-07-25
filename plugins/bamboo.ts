@@ -23,7 +23,10 @@ export class Bamboo extends PluginBase.PluginBase {
             auth: {
                 username: config.username,
                 password: config.password
-            }
+            },
+            rejectUnauthorized: false,
+            requestCert: true,
+            agent: false
         };
         request.get(config.url, opts, (err, resp) => {
             if(err) {

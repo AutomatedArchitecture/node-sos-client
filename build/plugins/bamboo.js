@@ -18,7 +18,10 @@ var Bamboo = (function (_super) {
             auth: {
                 username: config.username,
                 password: config.password
-            }
+            },
+            rejectUnauthorized: false,
+            requestCert: true,
+            agent: false
         };
         request.get(config.url, opts, function (err, resp) {
             if (err) {
