@@ -37,7 +37,6 @@ function poll(callback, startupData) {
 }
 
 function pollBuild(build, startupData) {
-    console.log('polling build:', build.name);
     build.plugin.poll(build.config, function (err, pollResult) {
         if (err) {
             console.error('Failed to poll: ' + build.name, err);
