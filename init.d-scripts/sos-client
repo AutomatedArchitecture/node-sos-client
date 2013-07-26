@@ -13,7 +13,7 @@
 
 
 DAEMON_PATH="/opt/sos-client/"
-DAEMON="node build/sos-client.js"
+DAEMON="/usr/local/bin/node build/sos-client.js"
 NAME="sos-client"
 DESC="Siren of Shame Client"
 PIDFILE=/var/run/$NAME.pid
