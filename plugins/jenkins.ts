@@ -46,7 +46,7 @@ export class Jenkins extends PluginBase.PluginBase {
 
     toPollResultStatus(state:string):PluginBase.PollResultStatus {
         state = state.toLowerCase();
-        if (state == 'blue') {
+        if (state.indexOf('blue') == 0 || state.indexOf('disabled') == 0 || state.indexOf('aborted') == 0) {
             return PluginBase.PollResultStatus.SUCCESS;
         }
         console.error("unknown jenkins state:", state);
