@@ -7,6 +7,7 @@ import async = module('async');
 import sos = module('sos-device');
 import PluginBase = module('plugin');
 import Bamboo = module('plugins/bamboo');
+import Jenkins = module('plugins/jenkins');
 
 var useMockDevice: boolean = false;
 
@@ -51,6 +52,9 @@ function poll(callback: (err?: Error) => void, startupData: StartupData): void {
            case 'bamboo':
                build.plugin = new Bamboo.Bamboo();
                break;
+           case 'jenkins':
+               build.plugin = new Jenkins.Jenkins();
+               break;
            default:
                return callback(new Error("Invalid build type: " + build.type));
        }
@@ -66,10 +70,10 @@ function pollBuild(build: ConfigBuild, startupData: StartupData): void {
             console.error('Failed to poll: ' + build.name, err);
         }
         if(pollResult) {
-            if(pollResult.status != build.lastPollResult.status 
+            if(pollResult.status != build.lastPollResult.status
               || pollResult.id != build.lastPollResult.id) {
                 build.lastPollResult = pollResult;
-                console.log('New poll results:', pollResult);
+                console.log('New poll results:', pollResult, build.lastPollResult);
                 updateSiren(startupData.sosDevice, startupData.sosDeviceInfo, build.lastPollResult);
             }
         }
@@ -121,7 +125,7 @@ function connectToDevice(callback: (err: Error, sosDevice?: SosDevice) => void):
     if(useMockDevice) {
         return callback(null, {
             readInfo: function(callback: (err?: Error, deviceInfo?: SosDeviceInfo) => void) {
-                console.log("MOCK SoS: readInfo:");                
+                console.log("MOCK SoS: readInfo:");
                 return callback(null, {
                    audioMode: 0,
                    audioPlayDuration: 0,
@@ -134,7 +138,7 @@ function connectToDevice(callback: (err: Error, sosDevice?: SosDevice) => void):
                 });
             },
             readAllInfo: function(callback: (err?: Error, deviceInfo?: SosDeviceAllInfo) => void) {
-                console.log("MOCK SoS: readInfo:");                
+                console.log("MOCK SoS: readInfo:");
                 return callback(null, {
                    audioMode: 0,
                    audioPlayDuration: 0,
@@ -177,7 +181,7 @@ function connectToDevice(callback: (err: Error, sosDevice?: SosDevice) => void):
             return callback(err);
         }
         return callback(null, sosDevice);
-    });    
+    });
 }
 
 function getSosDeviceInfo(callback: (err?: Error, sosDeviceInfo?: SosDeviceAllInfo) => void, startupData: StartupData): void {
@@ -187,7 +191,7 @@ function getSosDeviceInfo(callback: (err?: Error, sosDeviceInfo?: SosDeviceAllIn
         }
         console.log("deviceInfo:", deviceInfo);
         return callback(null, deviceInfo);
-    });  
+    });
 }
 
 run(function(err) {

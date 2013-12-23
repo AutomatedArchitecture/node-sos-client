@@ -7,12 +7,12 @@ var __extends = this.__extends || function (d, b) {
 var request = require('request');
 var PluginBase = require('../plugin');
 
-var Bamboo = (function (_super) {
-    __extends(Bamboo, _super);
-    function Bamboo() {
+var Jenkins = (function (_super) {
+    __extends(Jenkins, _super);
+    function Jenkins() {
         _super.apply(this, arguments);
     }
-    Bamboo.prototype.poll = function (config, callback) {
+    Jenkins.prototype.poll = function (config, callback) {
         var _this = this;
         var opts = {
             auth: {
@@ -27,27 +27,31 @@ var Bamboo = (function (_super) {
             if (err) {
                 return callback(err);
             }
-            var bambooResp = JSON.parse(resp.body);
-            if (bambooResp.results.result.length > 0) {
-                var status = bambooResp.results.result[0];
-                return callback(null, {
-                    status: _this.toPollResultStatus(status.state),
-                    id: status.id.toString()
-                });
-            }
-            return callback();
+            console.log(resp.body);
+            var jenkinsResp = JSON.parse(resp.body);
+            var status = "blue";
+            jenkinsResp.jobs.forEach(function (job) {
+                if (job.color != "blue") {
+                    status = job.color;
+                }
+            });
+
+            return callback(null, {
+                status: _this.toPollResultStatus(status),
+                id: "1"
+            });
         });
     };
 
-    Bamboo.prototype.toPollResultStatus = function (state) {
+    Jenkins.prototype.toPollResultStatus = function (state) {
         state = state.toLowerCase();
-        if (state == 'successful') {
+        if (state == 'blue') {
             return PluginBase.PollResultStatus.SUCCESS;
         }
-        console.error("unknown bamboo state:", state);
+        console.error("unknown jenkins state:", state);
         return PluginBase.PollResultStatus.FAILURE;
     };
-    return Bamboo;
+    return Jenkins;
 })(PluginBase.PluginBase);
-exports.Bamboo = Bamboo;
+exports.Jenkins = Jenkins;
 

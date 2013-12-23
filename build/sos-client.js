@@ -3,6 +3,7 @@ var async = require('async');
 var sos = require('sos-device');
 var PluginBase = require("./plugin");
 var Bamboo = require("./plugins/bamboo");
+var Jenkins = require("./plugins/jenkins");
 
 var useMockDevice = false;
 
@@ -28,6 +29,9 @@ function poll(callback, startupData) {
             case 'bamboo':
                 build.plugin = new Bamboo.Bamboo();
                 break;
+            case 'jenkins':
+                build.plugin = new Jenkins.Jenkins();
+                break;
             default:
                 return callback(new Error("Invalid build type: " + build.type));
         }
@@ -44,7 +48,7 @@ function pollBuild(build, startupData) {
         if (pollResult) {
             if (pollResult.status != build.lastPollResult.status || pollResult.id != build.lastPollResult.id) {
                 build.lastPollResult = pollResult;
-                console.log('New poll results:', pollResult);
+                console.log('New poll results:', pollResult, build.lastPollResult);
                 updateSiren(startupData.sosDevice, startupData.sosDeviceInfo, build.lastPollResult);
             }
         }

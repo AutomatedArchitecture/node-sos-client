@@ -37,7 +37,7 @@ export class Bamboo extends PluginBase.PluginBase {
                 var status = bambooResp.results.result[0];
                 return callback(null, {
                    status: this.toPollResultStatus(status.state),
-                   id: status.id
+                   id: status.id.toString()
                 });
             }
             return callback();
