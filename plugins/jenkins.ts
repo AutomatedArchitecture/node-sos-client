@@ -31,10 +31,10 @@ export class Jenkins extends PluginBase.PluginBase {
             console.log(resp.body);
             var jenkinsResp:JenkinsResponse = <JenkinsResponse>JSON.parse(resp.body);
             var status = "blue";
-            jenkinsResp.jobs.forEach(function(job) {
-               if(job.color != "blue") {
-                   status = job.color;
-               }
+            jenkinsResp.jobs.forEach(function (job) {
+                if (job.color != "blue") {
+                    status = job.color;
+                }
             });
 
             return callback(null, {
