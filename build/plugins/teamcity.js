@@ -12,6 +12,12 @@ var TeamCity = (function (_super) {
     function TeamCity() {
         _super.apply(this, arguments);
     }
+    TeamCity.prototype.poll = function (config, callback) {
+        return callback(null, {
+            status: 0 /* SUCCESS */,
+            id: "1"
+        });
+    };
     return TeamCity;
 })(PluginBase.PluginBase);
 exports.TeamCity = TeamCity;
