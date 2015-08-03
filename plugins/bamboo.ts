@@ -1,8 +1,8 @@
 
 /// <reference path="../external-ts-definitions/request.d.ts" />
 
-import request = module('request');
-import PluginBase = module('../plugin');
+import request = require('request');
+import PluginBase = require('../plugin');
 
 interface BambooResult {
     state: string;

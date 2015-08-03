@@ -1,3 +1,4 @@
+/// <reference path="../external-ts-definitions/request.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -42,12 +43,12 @@ var Bamboo = (function (_super) {
     Bamboo.prototype.toPollResultStatus = function (state) {
         state = state.toLowerCase();
         if (state == 'successful') {
-            return PluginBase.PollResultStatus.SUCCESS;
+            return 0 /* SUCCESS */;
         }
         console.error("unknown bamboo state:", state);
-        return PluginBase.PollResultStatus.FAILURE;
+        return 1 /* FAILURE */;
     };
     return Bamboo;
 })(PluginBase.PluginBase);
 exports.Bamboo = Bamboo;
-
+//# sourceMappingURL=bamboo.js.map

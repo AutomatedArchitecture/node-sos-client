@@ -3,11 +3,11 @@
 /// <reference path="./external-ts-definitions/sos-device.d.ts" />
 
 import fs = require('fs');
-import async = module('async');
-import sos = module('sos-device');
-import PluginBase = module('plugin');
-import Bamboo = module('plugins/bamboo');
-import Jenkins = module('plugins/jenkins');
+import async = require('async');
+import sos = require('sos-device');
+import PluginBase = require('./plugin');
+import Bamboo = require('./plugins/bamboo');
+import Jenkins = require('./plugins/jenkins');
 
 var useMockDevice: boolean = false;
 
@@ -43,11 +43,11 @@ function poll(callback: (err?: Error) => void, startupData: StartupData): void {
     var nameId: number = 0;
     startupData.config.builds.forEach((build) => {
        build.interval = build.interval || 30000;
-       build.name = build.name || (build.type + (nameId++));
-       build.lastPollResult = build.lastPollResult || {
-           status: PluginBase.PollResultStatus.SUCCESS,
-           id: 0
-       };
+        build.name = build.name || (build.type + (nameId++));
+        build.lastPollResult = build.lastPollResult || {
+            status: PluginBase.PollResultStatus.SUCCESS,
+            id: '0'
+        };
        switch(build.type) {
            case 'bamboo':
                build.plugin = new Bamboo.Bamboo();
