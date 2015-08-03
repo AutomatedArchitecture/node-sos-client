@@ -23,6 +23,7 @@
     <Content Include="package.json" />
     <Content Include="README.md" />
     <TypeScriptCompile Include="plugin.ts" />
+    <TypeScriptCompile Include="plugins\teamcity.ts" />
     <TypeScriptCompile Include="sos-client.ts" />
     <Compile Include="build\plugin.js" />
     <Compile Include="build\sos-client.js" />

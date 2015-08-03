@@ -5,7 +5,9 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
+var request = require('request');
 var PluginBase = require('../plugin');
+var PollResultStatus = PluginBase.PollResultStatus;
 
 var TeamCity = (function (_super) {
     __extends(TeamCity, _super);
@@ -13,10 +15,43 @@ var TeamCity = (function (_super) {
         _super.apply(this, arguments);
     }
     TeamCity.prototype.poll = function (config, callback) {
-        return callback(null, {
-            status: 0 /* SUCCESS */,
-            id: "1"
+        var _this = this;
+        var opts = {
+            auth: {
+                username: config.username,
+                password: config.password
+            },
+            rejectUnauthorized: false,
+            requestCert: true,
+            agent: false,
+            json: true
+        };
+        request.get(config.url, opts, function (err, resp) {
+            if (err) {
+                return callback(err);
+            }
+            console.log(resp.body);
+            var teamCityResponse = resp.body;
+            return callback(null, {
+                status: _this.toPollResultStatus(teamCityResponse.status),
+                id: teamCityResponse.id.toString(10)
+            });
         });
+    };
+
+    TeamCity.prototype.toPollResultStatus = function (status) {
+        if (status === 'SUCCESS')
+            return 0 /* SUCCESS */;
+        if (status === 'FAILURE')
+            return 1 /* FAILURE */;
+        if (status === 'ERROR') {
+            console.error("error state returned from team city");
+
+            // when the server is down for maintenance just pretend that is passed, for now
+            return 0 /* SUCCESS */;
+        }
+        console.error("unexpected response from team city: " + status);
+        return 1 /* FAILURE */;
     };
     return TeamCity;
 })(PluginBase.PluginBase);
