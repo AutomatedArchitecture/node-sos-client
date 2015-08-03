@@ -1,4 +1,4 @@
-﻿/// <reference path="./external-ts-definitions/node.d.ts" />
+/// <reference path="./external-ts-definitions/node.d.ts" />
 /// <reference path="./external-ts-definitions/async.d.ts" />
 /// <reference path="./external-ts-definitions/sos-device.d.ts" />
 var fs = require('fs');
@@ -7,6 +7,7 @@ var sos = require('sos-device');
 var PluginBase = require('./plugin');
 var Bamboo = require('./plugins/bamboo');
 var Jenkins = require('./plugins/jenkins');
+var TeamCity = require('./plugins/teamcity');
 
 var useMockDevice = false;
 
@@ -34,6 +35,9 @@ function poll(callback, startupData) {
                 break;
             case 'jenkins':
                 build.plugin = new Jenkins.Jenkins();
+                break;
+            case 'teamcity':
+                build.plugin = new TeamCity.TeamCity();
                 break;
             default:
                 return callback(new Error("Invalid build type: " + build.type));

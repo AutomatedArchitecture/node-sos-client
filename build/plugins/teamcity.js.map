@@ -1,0 +1,1 @@
+{"version":3,"file":"teamcity.js","sourceRoot":"","sources":["../../plugins/teamcity.ts"],"names":["TeamCity","TeamCity.constructor"],"mappings":"AAAA,gEAAgE;;;;;;;AAAhE,qCAGyC;;AAEzC;IAA8BA,2BAAqBA;IAAnDA;QAA8BC,6BAAqBA;IAEnDA,CAACA;AAAAD,IAADA,gBAACA;AAADA,CAACA,EAF6B,UAAU,CAAC,UAAU,EAElD;AAFD,4BAEC;AAAA"}

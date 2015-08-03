@@ -8,6 +8,7 @@ import sos = require('sos-device');
 import PluginBase = require('./plugin');
 import Bamboo = require('./plugins/bamboo');
 import Jenkins = require('./plugins/jenkins');
+import TeamCity = require('./plugins/teamcity');
 
 var useMockDevice: boolean = false;
 
@@ -54,6 +55,9 @@ function poll(callback: (err?: Error) => void, startupData: StartupData): void {
                break;
            case 'jenkins':
                build.plugin = new Jenkins.Jenkins();
+               break;
+           case 'teamcity':
+               build.plugin = new TeamCity.TeamCity();
                break;
            default:
                return callback(new Error("Invalid build type: " + build.type));
