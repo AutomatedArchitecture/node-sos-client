@@ -1,9 +1,12 @@
+﻿/// <reference path="./external-ts-definitions/node.d.ts" />
+/// <reference path="./external-ts-definitions/async.d.ts" />
+/// <reference path="./external-ts-definitions/sos-device.d.ts" />
 var fs = require('fs');
 var async = require('async');
 var sos = require('sos-device');
-var PluginBase = require("./plugin");
-var Bamboo = require("./plugins/bamboo");
-var Jenkins = require("./plugins/jenkins");
+var PluginBase = require('plugin');
+var Bamboo = require('plugins/bamboo');
+var Jenkins = require('plugins/jenkins');
 
 var useMockDevice = false;
 
@@ -22,8 +25,8 @@ function poll(callback, startupData) {
         build.interval = build.interval || 30000;
         build.name = build.name || (build.type + (nameId++));
         build.lastPollResult = build.lastPollResult || {
-            status: PluginBase.PollResultStatus.SUCCESS,
-            id: 0
+            status: 0 /* SUCCESS */,
+            id: '0'
         };
         switch (build.type) {
             case 'bamboo':
@@ -41,6 +44,7 @@ function poll(callback, startupData) {
 }
 
 function pollBuild(build, startupData) {
+    //console.log('polling build:', build.name);
     build.plugin.poll(build.config, function (err, pollResult) {
         if (err) {
             console.error('Failed to poll: ' + build.name, err);
@@ -57,7 +61,7 @@ function pollBuild(build, startupData) {
 }
 
 function updateSiren(sosDevice, sosDeviceInfo, pollResult) {
-    if (pollResult.status == PluginBase.PollResultStatus.FAILURE) {
+    if (pollResult.status == 1 /* FAILURE */) {
         var controlPacket = {
             audioMode: sosDeviceInfo.audioPatterns[0].id,
             audioPlayDuration: 1000,
@@ -70,7 +74,7 @@ function updateSiren(sosDevice, sosDeviceInfo, pollResult) {
                 console.error("Could not send SoS control packet", err);
             }
         });
-    } else if (pollResult.status == PluginBase.PollResultStatus.SUCCESS) {
+    } else if (pollResult.status == 0 /* SUCCESS */) {
         var controlPacket = {
             audioMode: sosDeviceInfo.audioPatterns[1].id,
             audioPlayDuration: 500,
@@ -176,4 +180,4 @@ run(function (err) {
     }
     console.log("startup successful");
 });
-
+//# sourceMappingURL=sos-client.js.map
