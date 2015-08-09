@@ -77,45 +77,50 @@ function getOnSuccessConfigOrDefault(startupData) {
     };
 }
 
+function getOnFailConfigOrDefault(startupData) {
+    if (startupData.config.onFail) {
+        return startupData.config.onFail;
+    }
+
+    return {
+        "audioPatternIndex": 0,
+        "audioDuration": 1000,
+        "ledPatternIndex": 0,
+        "ledPlayDuration": 5000
+    };
+}
+
 function getMode(patterns, patternIndex) {
     if (patternIndex === null)
         return null;
     return patterns[patternIndex].id;
 }
 
+function playConfig(sosDeviceInfo, playConfig, sosDevice) {
+    var controlPacket = {
+        audioMode: getMode(sosDeviceInfo.audioPatterns, playConfig.audioPatternIndex),
+        audioPlayDuration: playConfig.audioDuration,
+        ledMode: getMode(sosDeviceInfo.ledPatterns, playConfig.ledPatternIndex),
+        ledPlayDuration: playConfig.ledPlayDuration
+    };
+    console.log(controlPacket);
+    sosDevice.sendControlPacket(controlPacket, function (err) {
+        if (err) {
+            console.error("Could not send SoS control packet", err);
+        }
+    });
+}
+
 function updateSiren(startupData, pollResult) {
     var sosDevice = startupData.sosDevice;
     var sosDeviceInfo = startupData.sosDeviceInfo;
 
-    var controlPacket;
     if (pollResult.status === 1 /* FAILURE */) {
-        controlPacket = {
-            audioMode: sosDeviceInfo.audioPatterns[0].id,
-            audioPlayDuration: 1000,
-            ledMode: sosDeviceInfo.ledPatterns[0].id,
-            ledPlayDuration: 5000
-        };
-        console.log(controlPacket);
-        sosDevice.sendControlPacket(controlPacket, function (err) {
-            if (err) {
-                console.error("Could not send SoS control packet", err);
-            }
-        });
+        var onFailConfig = getOnFailConfigOrDefault(startupData);
+        playConfig(sosDeviceInfo, onFailConfig, sosDevice);
     } else if (pollResult.status === 0 /* SUCCESS */) {
         var onSuccessConfig = getOnSuccessConfigOrDefault(startupData);
-
-        controlPacket = {
-            audioMode: getMode(sosDeviceInfo.audioPatterns, onSuccessConfig.audioPatternIndex),
-            audioPlayDuration: onSuccessConfig.audioDuration,
-            ledMode: getMode(sosDeviceInfo.ledPatterns, onSuccessConfig.ledPatternIndex),
-            ledPlayDuration: onSuccessConfig.ledPlayDuration
-        };
-        console.log(controlPacket);
-        sosDevice.sendControlPacket(controlPacket, function (err) {
-            if (err) {
-                console.error("Could not send SoS control packet", err);
-            }
-        });
+        playConfig(sosDeviceInfo, onSuccessConfig, sosDevice);
     }
 }
 

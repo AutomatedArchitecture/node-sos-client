@@ -98,45 +98,50 @@ function getOnSuccessConfigOrDefault(startupData: any) {
     };
 }
 
+function getOnFailConfigOrDefault(startupData: any) {
+    if (startupData.config.onFail) {
+        return startupData.config.onFail;
+    }
+
+    return {
+        "audioPatternIndex": 0,
+        "audioDuration": 1000,
+        "ledPatternIndex": 0,
+        "ledPlayDuration": 5000
+    };
+}
+
 function getMode(patterns, patternIndex?: number)
 {
     if (patternIndex === null) return null;
     return patterns[patternIndex].id;
 }
 
+function playConfig(sosDeviceInfo, playConfig, sosDevice) {
+    var controlPacket = {
+        audioMode: getMode(sosDeviceInfo.audioPatterns, playConfig.audioPatternIndex),
+        audioPlayDuration: playConfig.audioDuration,
+        ledMode: getMode(sosDeviceInfo.ledPatterns, playConfig.ledPatternIndex),
+        ledPlayDuration: playConfig.ledPlayDuration
+    };
+    console.log(controlPacket);
+    sosDevice.sendControlPacket(controlPacket, (err?) => {
+        if (err) {
+            console.error("Could not send SoS control packet", err);
+        }
+    });
+}
+
 function updateSiren(startupData : IStartupData, pollResult: PluginBase.PollResult) {
     var sosDevice = startupData.sosDevice;
     var sosDeviceInfo = startupData.sosDeviceInfo;
 
-    var controlPacket:SosDeviceControlPacket;
     if(pollResult.status === PluginBase.PollResultStatus.FAILURE) {
-        controlPacket = {
-            audioMode: sosDeviceInfo.audioPatterns[0].id,
-            audioPlayDuration: 1000,
-            ledMode: sosDeviceInfo.ledPatterns[0].id,
-            ledPlayDuration: 5000
-        };
-        console.log(controlPacket);
-        sosDevice.sendControlPacket(controlPacket, (err?) => {
-            if(err) {
-                console.error("Could not send SoS control packet", err);
-            }
-        });
+        var onFailConfig = getOnFailConfigOrDefault(startupData);
+        playConfig(sosDeviceInfo, onFailConfig, sosDevice);
     } else if(pollResult.status === PluginBase.PollResultStatus.SUCCESS) {
         var onSuccessConfig = getOnSuccessConfigOrDefault(startupData);
-
-        controlPacket = {
-            audioMode: getMode(sosDeviceInfo.audioPatterns, onSuccessConfig.audioPatternIndex),
-            audioPlayDuration: onSuccessConfig.audioDuration,
-            ledMode: getMode(sosDeviceInfo.ledPatterns, onSuccessConfig.ledPatternIndex),
-            ledPlayDuration: onSuccessConfig.ledPlayDuration
-        };
-        console.log(controlPacket);
-        sosDevice.sendControlPacket(controlPacket, (err?) => {
-            if(err) {
-                console.error("Could not send SoS control packet", err);
-            }
-        });
+        playConfig(sosDeviceInfo, onSuccessConfig, sosDevice);
     }
 }
 
