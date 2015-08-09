@@ -85,7 +85,7 @@ function pollBuild(build: IConfigBuild, startupData: IStartupData): void {
     });
 }
 
-function getOnSuccessConfig(startupData) {
+function getOnSuccessConfigOrDefault(startupData: any) {
     if (startupData.config.onSuccess) {
         return startupData.config.onSuccess;
     }
@@ -96,6 +96,12 @@ function getOnSuccessConfig(startupData) {
         "ledPatternIndex": 0,
         "ledPlayDuration": 500
     };
+}
+
+function getMode(patterns, patternIndex?: number)
+{
+    if (patternIndex === null) return null;
+    return patterns[patternIndex].id;
 }
 
 function updateSiren(startupData : IStartupData, pollResult: PluginBase.PollResult) {
@@ -117,12 +123,12 @@ function updateSiren(startupData : IStartupData, pollResult: PluginBase.PollResu
             }
         });
     } else if(pollResult.status === PluginBase.PollResultStatus.SUCCESS) {
-        var onSuccessConfig = getOnSuccessConfig(startupData);
+        var onSuccessConfig = getOnSuccessConfigOrDefault(startupData);
 
         controlPacket = {
-            audioMode: sosDeviceInfo.audioPatterns[onSuccessConfig.audioPatternIndex].id,
+            audioMode: getMode(sosDeviceInfo.audioPatterns, onSuccessConfig.audioPatternIndex),
             audioPlayDuration: onSuccessConfig.audioDuration,
-            ledMode: sosDeviceInfo.ledPatterns[onSuccessConfig.ledPatternIndex].id,
+            ledMode: getMode(sosDeviceInfo.ledPatterns, onSuccessConfig.ledPatternIndex),
             ledPlayDuration: onSuccessConfig.ledPlayDuration
         };
         console.log(controlPacket);

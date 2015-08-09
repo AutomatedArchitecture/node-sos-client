@@ -64,7 +64,7 @@ function pollBuild(build, startupData) {
     });
 }
 
-function getOnSuccessConfig(startupData) {
+function getOnSuccessConfigOrDefault(startupData) {
     if (startupData.config.onSuccess) {
         return startupData.config.onSuccess;
     }
@@ -75,6 +75,12 @@ function getOnSuccessConfig(startupData) {
         "ledPatternIndex": 0,
         "ledPlayDuration": 500
     };
+}
+
+function getMode(patterns, patternIndex) {
+    if (patternIndex === null)
+        return null;
+    return patterns[patternIndex].id;
 }
 
 function updateSiren(startupData, pollResult) {
@@ -96,12 +102,12 @@ function updateSiren(startupData, pollResult) {
             }
         });
     } else if (pollResult.status === 0 /* SUCCESS */) {
-        var onSuccessConfig = getOnSuccessConfig(startupData);
+        var onSuccessConfig = getOnSuccessConfigOrDefault(startupData);
 
         controlPacket = {
-            audioMode: sosDeviceInfo.audioPatterns[onSuccessConfig.audioPatternIndex].id,
+            audioMode: getMode(sosDeviceInfo.audioPatterns, onSuccessConfig.audioPatternIndex),
             audioPlayDuration: onSuccessConfig.audioDuration,
-            ledMode: sosDeviceInfo.ledPatterns[onSuccessConfig.ledPatternIndex].id,
+            ledMode: getMode(sosDeviceInfo.ledPatterns, onSuccessConfig.ledPatternIndex),
             ledPlayDuration: onSuccessConfig.ledPlayDuration
         };
         console.log(controlPacket);
