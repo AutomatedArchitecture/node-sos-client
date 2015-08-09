@@ -1,4 +1,4 @@
-/// <reference path="./external-ts-definitions/node.d.ts" />
+﻿/// <reference path="./external-ts-definitions/node.d.ts" />
 /// <reference path="./external-ts-definitions/async.d.ts" />
 /// <reference path="./external-ts-definitions/sos-device.d.ts" />
 var fs = require('fs');
@@ -54,19 +54,36 @@ function pollBuild(build, startupData) {
             console.error('Failed to poll: ' + build.name, err);
         }
         if (pollResult) {
-            if (pollResult.status != build.lastPollResult.status || pollResult.id != build.lastPollResult.id) {
+            if (pollResult.status !== build.lastPollResult.status || pollResult.id !== build.lastPollResult.id) {
                 build.lastPollResult = pollResult;
                 console.log('New poll results:', pollResult, build.lastPollResult);
-                updateSiren(startupData.sosDevice, startupData.sosDeviceInfo, build.lastPollResult);
+                updateSiren(startupData, build.lastPollResult);
             }
         }
         setTimeout(pollBuild.bind(null, build, startupData), build.interval);
     });
 }
 
-function updateSiren(sosDevice, sosDeviceInfo, pollResult) {
-    if (pollResult.status == 1 /* FAILURE */) {
-        var controlPacket = {
+function getOnSuccessConfig(startupData) {
+    if (startupData.config.onSuccess) {
+        return startupData.config.onSuccess;
+    }
+
+    return {
+        "audioPatternIndex": 1,
+        "audioDuration": 500,
+        "ledPatternIndex": 0,
+        "ledPlayDuration": 500
+    };
+}
+
+function updateSiren(startupData, pollResult) {
+    var sosDevice = startupData.sosDevice;
+    var sosDeviceInfo = startupData.sosDeviceInfo;
+
+    var controlPacket;
+    if (pollResult.status === 1 /* FAILURE */) {
+        controlPacket = {
             audioMode: sosDeviceInfo.audioPatterns[0].id,
             audioPlayDuration: 1000,
             ledMode: sosDeviceInfo.ledPatterns[0].id,
@@ -78,12 +95,14 @@ function updateSiren(sosDevice, sosDeviceInfo, pollResult) {
                 console.error("Could not send SoS control packet", err);
             }
         });
-    } else if (pollResult.status == 0 /* SUCCESS */) {
-        var controlPacket = {
-            audioMode: sosDeviceInfo.audioPatterns[1].id,
-            audioPlayDuration: 500,
-            ledMode: sosDeviceInfo.ledPatterns[0].id,
-            ledPlayDuration: 500
+    } else if (pollResult.status === 0 /* SUCCESS */) {
+        var onSuccessConfig = getOnSuccessConfig(startupData);
+
+        controlPacket = {
+            audioMode: sosDeviceInfo.audioPatterns[onSuccessConfig.audioPatternIndex].id,
+            audioPlayDuration: onSuccessConfig.audioDuration,
+            ledMode: sosDeviceInfo.ledPatterns[onSuccessConfig.ledPatternIndex].id,
+            ledPlayDuration: onSuccessConfig.ledPlayDuration
         };
         console.log(controlPacket);
         sosDevice.sendControlPacket(controlPacket, function (err) {
