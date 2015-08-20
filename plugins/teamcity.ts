@@ -3,10 +3,16 @@
 import request = require('request');
 import PluginBase = require('../plugin');
 import PollResultStatus = PluginBase.PollResultStatus;
+import PollResult = PluginBase.PollResult;
+
+interface IBuild {
+    id: number;
+    buildTypeId: string;
+    status: string;
+}
 
 interface ITeamCityResponse {
-    id: number;
-    status: string;
+    build: IBuild[]
 }
 
 export class TeamCity extends PluginBase.PluginBase {
@@ -27,22 +33,21 @@ export class TeamCity extends PluginBase.PluginBase {
             }
             console.log(resp.body);
             var teamCityResponse: ITeamCityResponse = <ITeamCityResponse>resp.body;
-            return callback(null, {
-                status: this.toPollResultStatus(teamCityResponse.status),
-                id: teamCityResponse.id.toString(10)
-            });
+            return callback(null, this.toPollResult(teamCityResponse));
         });
     }
 
-    toPollResultStatus(status: string): PollResultStatus {
-        if (status === 'SUCCESS') return PollResultStatus.SUCCESS;
-        if (status === 'FAILURE') return PollResultStatus.FAILURE;
-        if (status === 'ERROR') {
-            console.error("error state returned from team city");
-            // when the server is down for maintenance just pretend that is passed, for now
-            return PollResultStatus.SUCCESS;
+    private toPollResult(response: ITeamCityResponse): PollResult {
+        if (response.build.length === 0) {
+            return {
+                id: "AllBuildTypes",
+                status: PollResultStatus.SUCCESS
+            }
+        } else {
+            return {
+                id: response.build[0].id.toString(),
+                status: PollResultStatus.FAILURE
+            }
         }
-        console.error("unexpected response from team city: " + status);
-        return PollResultStatus.FAILURE;
     }
 }

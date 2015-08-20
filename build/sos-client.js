@@ -1,4 +1,4 @@
-﻿/// <reference path="./external-ts-definitions/node.d.ts" />
+/// <reference path="./external-ts-definitions/node.d.ts" />
 /// <reference path="./external-ts-definitions/async.d.ts" />
 /// <reference path="./external-ts-definitions/sos-device.d.ts" />
 var fs = require('fs');

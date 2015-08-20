@@ -32,26 +32,22 @@ var TeamCity = (function (_super) {
             }
             console.log(resp.body);
             var teamCityResponse = resp.body;
-            return callback(null, {
-                status: _this.toPollResultStatus(teamCityResponse.status),
-                id: teamCityResponse.id.toString(10)
-            });
+            return callback(null, _this.toPollResult(teamCityResponse));
         });
     };
 
-    TeamCity.prototype.toPollResultStatus = function (status) {
-        if (status === 'SUCCESS')
-            return 0 /* SUCCESS */;
-        if (status === 'FAILURE')
-            return 1 /* FAILURE */;
-        if (status === 'ERROR') {
-            console.error("error state returned from team city");
-
-            // when the server is down for maintenance just pretend that is passed, for now
-            return 0 /* SUCCESS */;
+    TeamCity.prototype.toPollResult = function (response) {
+        if (response.build.length === 0) {
+            return {
+                id: "AllBuildTypes",
+                status: 0 /* SUCCESS */
+            };
+        } else {
+            return {
+                id: response.build[0].id.toString(),
+                status: 1 /* FAILURE */
+            };
         }
-        console.error("unexpected response from team city: " + status);
-        return 1 /* FAILURE */;
     };
     return TeamCity;
 })(PluginBase.PluginBase);
