@@ -2,6 +2,10 @@
 
 ## Install on a Raspberry Pi
 
+See our blog [Raspberry Pi Powered Siren of Shame via Node.js](http://blog.sirenofshame.com/2014/07/raspberry-pi-powered-siren-of-shame-via.html).  
+
+Summary:
+
 * Download node source code, extract, `./configure`, `make`, `sudo make install`
 * Install libusb: `sudo apt-get install libusb-dev`
 * `git clone git@github.com:AutomatedArchitecture/node-sos-client.git`
@@ -10,7 +14,7 @@
 * Copy config.json.example to config.json and edit.
 * `sudo node build/sos-client.js`
 
-If you would like it to run as a service
+To run as a service
 
 ```
 sudo mv <sos-client> /opt/sos-client
@@ -29,13 +33,28 @@ Modify the config.json file to customize which server(s) to connect to, what to 
 {
     "builds": [
         {
-            "type": "teamcity",
+            "type": "jenkins",
             "config": {
-                "url": "http://server/httpAuth/app/rest/builds/buildType:MainBuildConfiguration2",
+                "url": "http://127.0.0.1/jenkins/api/json/",
                 "username": "[username]",
                 "password": "[password]"
-            },
-            "interval":  1000
+            }
+        },
+        {
+            "type": "teamcity",
+            "config": {
+                "url": "http://127.0.0.1/httpAuth/app/rest/builds/buildType:MyBuildIdentifier",
+                "username": "<username>",
+                "password": "<password>"
+            }
+        },
+        {
+            "type": "bamboo",
+            "config": {
+                "url": "https://bamboo.example.com/rest/api/latest/result/BUILDNAME-BUILDPLAN.json?max-results=1",
+                "username": "<username>",
+                "password": "<password>"
+            }
         }
     ]
     "onSuccess": {
@@ -55,13 +74,13 @@ Modify the config.json file to customize which server(s) to connect to, what to 
 
 ### builds
 
-Builds is an array of build objects. To monitor multiple builds enter multiple build objects into this section.
+An array of build objects. To monitor multiple builds enter multiple build objects into this section.
 
 ### build
 
 * _type_ - Required. Either "teamciy", "bamboo", or "jenkins"
 * _interval_ - Optional.  Defaults to 30 seconds.  Values are in milliseconds.
-* _config_ - The server's url, username, and password
+* _config_ - The build's url, and the server's username, and password
 
 ### url
 
