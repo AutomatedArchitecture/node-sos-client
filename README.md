@@ -44,7 +44,7 @@ Modify the config.json file to customize which server(s) to connect to, what to 
         {
             "type": "teamcity",
             "config": {
-                "url": "http://127.0.0.1/httpAuth/app/rest/builds/buildType:MyBuildIdentifier",
+                "url": "http://127.0.0.1/httpAuth/app/rest/builds/?locator=status:failure,lookupLimit:1",
                 "buildTypes": [ "BuildTypeId1", "BuildTypeId2" ],
                 "username": "<username>",
                 "password": "<password>"
