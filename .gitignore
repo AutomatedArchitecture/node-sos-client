@@ -6,3 +6,5 @@ node_modules
 npm-debug.log
 .idea
 config.json
+/.ntvs_analysis.dat
+/node-sos-client.v2.ncrunchsolution
