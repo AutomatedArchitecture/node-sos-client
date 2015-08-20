@@ -32,19 +32,44 @@ var TeamCity = (function (_super) {
             }
             console.log(resp.body);
             var teamCityResponse = resp.body;
-            return callback(null, _this.toPollResult(teamCityResponse));
+            return callback(null, _this.toPollResult(teamCityResponse, config));
         });
     };
 
-    TeamCity.prototype.toPollResult = function (response) {
-        if (response.build.length === 0) {
+    TeamCity.prototype.contains = function (list, item) {
+        for (var i = 0; i < list.length; i++) {
+            var listItem = list[i];
+            if (listItem === item)
+                return true;
+        }
+        return false;
+    };
+
+    TeamCity.prototype.getWatchedBuilds = function (response, config) {
+        if (config.buildTypes === undefined)
+            return response;
+
+        var filteredBuilds = { build: [] };
+        for (var i = 0; i < response.build.length; i++) {
+            var build = response.build[i];
+            if (this.contains(config.buildTypes, build.buildTypeId)) {
+                filteredBuilds.build.push(build);
+            }
+        }
+        return filteredBuilds;
+    };
+
+    TeamCity.prototype.toPollResult = function (response, config) {
+        var watchedBuilds = this.getWatchedBuilds(response, config);
+
+        if (watchedBuilds.build.length === 0) {
             return {
                 id: "AllBuildTypes",
                 status: 0 /* SUCCESS */
             };
         } else {
             return {
-                id: response.build[0].id.toString(),
+                id: watchedBuilds.build[0].id.toString(),
                 status: 1 /* FAILURE */
             };
         }

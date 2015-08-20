@@ -33,19 +33,43 @@ export class TeamCity extends PluginBase.PluginBase {
             }
             console.log(resp.body);
             var teamCityResponse: ITeamCityResponse = <ITeamCityResponse>resp.body;
-            return callback(null, this.toPollResult(teamCityResponse));
+            return callback(null, this.toPollResult(teamCityResponse, config));
         });
     }
 
-    private toPollResult(response: ITeamCityResponse): PollResult {
-        if (response.build.length === 0) {
+    private contains(list, item): boolean {
+        for (var i = 0; i < list.length; i++) {
+            var listItem = list[i];
+            if (listItem === item)
+                return true;
+        }
+        return false;
+    }
+
+    private getWatchedBuilds(response: ITeamCityResponse, config): ITeamCityResponse {
+        if (config.buildTypes === undefined) return response;
+
+        var filteredBuilds: ITeamCityResponse = { build: [] };
+        for (var i = 0; i < response.build.length; i++) {
+            var build = response.build[i];
+            if (this.contains(config.buildTypes, build.buildTypeId)) {
+                filteredBuilds.build.push(build);
+            }
+        }
+        return filteredBuilds;
+    }
+
+    private toPollResult(response: ITeamCityResponse, config): PollResult {
+        var watchedBuilds = this.getWatchedBuilds(response, config);
+
+        if (watchedBuilds.build.length === 0) {
             return {
                 id: "AllBuildTypes",
                 status: PollResultStatus.SUCCESS
             }
         } else {
             return {
-                id: response.build[0].id.toString(),
+                id: watchedBuilds.build[0].id.toString(),
                 status: PollResultStatus.FAILURE
             }
         }

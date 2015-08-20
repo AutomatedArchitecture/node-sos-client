@@ -38,15 +38,18 @@ Modify the config.json file to customize which server(s) to connect to, what to 
                 "url": "http://127.0.0.1/jenkins/api/json/",
                 "username": "[username]",
                 "password": "[password]"
-            }
+            },
+            "interval": 3000
         },
         {
             "type": "teamcity",
             "config": {
                 "url": "http://127.0.0.1/httpAuth/app/rest/builds/buildType:MyBuildIdentifier",
+                "buildTypes": [ "BuildTypeId1", "BuildTypeId2" ],
                 "username": "<username>",
                 "password": "<password>"
-            }
+            },
+            "interval": 3000
         },
         {
             "type": "bamboo",
@@ -54,7 +57,8 @@ Modify the config.json file to customize which server(s) to connect to, what to 
                 "url": "https://bamboo.example.com/rest/api/latest/result/BUILDNAME-BUILDPLAN.json?max-results=1",
                 "username": "<username>",
                 "password": "<password>"
-            }
+            },
+            "interval": 3000
         }
     ]
     "onSuccess": {
@@ -80,7 +84,7 @@ An array of build objects. To monitor multiple builds enter multiple build objec
 
 * _type_ - Required. Either "teamciy", "bamboo", or "jenkins"
 * _interval_ - Optional.  Defaults to 30 seconds.  Values are in milliseconds.
-* _config_ - The build's url, and the server's username, and password
+* _config_ - The build's url, and the server's username, and password, see below
 
 ### url
 
@@ -90,11 +94,16 @@ The build url represents the location to get JSON data.  For bamboo use a format
 
 For TeamCity use a format like:
 
-> http://127.0.0.1/httpAuth/app/rest/builds/buildType:MyBuildIdentifier
+> http://127.0.0.1/httpAuth/app/rest/builds/?locator=status:failure,lookupLimit:1
 
 And for Jenkins use a format like:
 
 > http://127.0.0.1/jenkins/api/json/
+
+### buildTypes
+
+An array of the build types to watch.  Currently only supported by Team City.  Leave 
+off to watch all builds on the server.
 
 ### onFail/onSuccess
 
