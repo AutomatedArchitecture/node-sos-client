@@ -4,10 +4,10 @@
 // https://github.com/mikeal/request
 
 declare module "request" {
-	import request = module('request');
-	import stream = module('stream');
-	import http = module('http');
-	import FormData = module('form-data');
+	import request = require('request');
+    import stream = require('stream');
+    import http = require('http');
+    import FormData = require('form-data');
     
 //	export function noname(uri: string, options?: Options, callback?: (error: any, response: any, body: any) => void): Request;
 //	export function noname(uri: string, callback?: (error: any, response: any, body: any) => void): Request;
@@ -76,9 +76,9 @@ declare module "request" {
 		//start();
 		//abort();
 		pipeDest(dest);
-		setHeader(name: string, value: string, clobber?: bool): Request;
+		setHeader(name: string, value: string, clobber?: boolean): Request;
 		setHeaders(headers: any): Request;
-		qs(q: any, clobber?: bool): Request;
+		qs(q: any, clobber?: boolean): Request;
 		form(form: any): FormData.FormData;
 		multipart(multipart: { body: any; }[]): Request;
 		json(val: any): Request;

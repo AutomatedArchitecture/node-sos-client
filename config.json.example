@@ -1,12 +1,30 @@
 {
-  "builds": [
-    {
-      "type": "bamboo",
-      "config": {
-        "url": "https://bamboo.example.com/rest/api/latest/result/BUILDNAME-BUILDPLAN.json?max-results=1",
-        "username": "<username>",
-        "password": "<password>"
-      }
-    }
-  ]
+    "builds": [
+        {
+            "type": "bamboo",
+            "config": {
+                "url": "https://bamboo.example.com/rest/api/latest/result/BUILDNAME-BUILDPLAN.json?max-results=1",
+                "username": "<username>",
+                "password": "<password>"
+            }
+        }
+/*
+        {
+            "type": "teamcity",
+            "config": {
+                "url": "http://127.0.0.1/httpAuth/app/rest/builds/buildType:MyBuildIdentifier",
+                "username": "<username>",
+                "password": "<password>"
+            }
+        },
+        {
+            "type": "jenkins",
+            "config": {
+                "url": "http://127.0.0.1/jenkins/api/json/",
+                "username": "[username]",
+                "password": "[password]"
+            }
+        }
+*/
+    ]
 }

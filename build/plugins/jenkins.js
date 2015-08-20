@@ -1,3 +1,4 @@
+/// <reference path="../external-ts-definitions/request.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -46,12 +47,12 @@ var Jenkins = (function (_super) {
     Jenkins.prototype.toPollResultStatus = function (state) {
         state = state.toLowerCase();
         if (state.indexOf('blue') == 0 || state.indexOf('disabled') == 0 || state.indexOf('aborted') == 0) {
-            return PluginBase.PollResultStatus.SUCCESS;
+            return 0 /* SUCCESS */;
         }
         console.error("unknown jenkins state:", state);
-        return PluginBase.PollResultStatus.FAILURE;
+        return 1 /* FAILURE */;
     };
     return Jenkins;
 })(PluginBase.PluginBase);
 exports.Jenkins = Jenkins;
-
+//# sourceMappingURL=jenkins.js.map

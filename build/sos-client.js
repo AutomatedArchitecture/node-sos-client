@@ -1,9 +1,13 @@
+﻿/// <reference path="./external-ts-definitions/node.d.ts" />
+/// <reference path="./external-ts-definitions/async.d.ts" />
+/// <reference path="./external-ts-definitions/sos-device.d.ts" />
 var fs = require('fs');
 var async = require('async');
 var sos = require('sos-device');
-var PluginBase = require("./plugin");
-var Bamboo = require("./plugins/bamboo");
-var Jenkins = require("./plugins/jenkins");
+var PluginBase = require('./plugin');
+var Bamboo = require('./plugins/bamboo');
+var Jenkins = require('./plugins/jenkins');
+var TeamCity = require('./plugins/teamcity');
 
 var useMockDevice = false;
 
@@ -22,8 +26,8 @@ function poll(callback, startupData) {
         build.interval = build.interval || 30000;
         build.name = build.name || (build.type + (nameId++));
         build.lastPollResult = build.lastPollResult || {
-            status: PluginBase.PollResultStatus.SUCCESS,
-            id: 0
+            status: 0 /* SUCCESS */,
+            id: '0'
         };
         switch (build.type) {
             case 'bamboo':
@@ -31,6 +35,9 @@ function poll(callback, startupData) {
                 break;
             case 'jenkins':
                 build.plugin = new Jenkins.Jenkins();
+                break;
+            case 'teamcity':
+                build.plugin = new TeamCity.TeamCity();
                 break;
             default:
                 return callback(new Error("Invalid build type: " + build.type));
@@ -41,48 +48,79 @@ function poll(callback, startupData) {
 }
 
 function pollBuild(build, startupData) {
+    //console.log('polling build:', build.name);
     build.plugin.poll(build.config, function (err, pollResult) {
         if (err) {
             console.error('Failed to poll: ' + build.name, err);
         }
         if (pollResult) {
-            if (pollResult.status != build.lastPollResult.status || pollResult.id != build.lastPollResult.id) {
+            if (pollResult.status !== build.lastPollResult.status || pollResult.id !== build.lastPollResult.id) {
                 build.lastPollResult = pollResult;
                 console.log('New poll results:', pollResult, build.lastPollResult);
-                updateSiren(startupData.sosDevice, startupData.sosDeviceInfo, build.lastPollResult);
+                updateSiren(startupData, build.lastPollResult);
             }
         }
         setTimeout(pollBuild.bind(null, build, startupData), build.interval);
     });
 }
 
-function updateSiren(sosDevice, sosDeviceInfo, pollResult) {
-    if (pollResult.status == PluginBase.PollResultStatus.FAILURE) {
-        var controlPacket = {
-            audioMode: sosDeviceInfo.audioPatterns[0].id,
-            audioPlayDuration: 1000,
-            ledMode: sosDeviceInfo.ledPatterns[0].id,
-            ledPlayDuration: 5000
-        };
-        console.log(controlPacket);
-        sosDevice.sendControlPacket(controlPacket, function (err) {
-            if (err) {
-                console.error("Could not send SoS control packet", err);
-            }
-        });
-    } else if (pollResult.status == PluginBase.PollResultStatus.SUCCESS) {
-        var controlPacket = {
-            audioMode: sosDeviceInfo.audioPatterns[1].id,
-            audioPlayDuration: 500,
-            ledMode: sosDeviceInfo.ledPatterns[0].id,
-            ledPlayDuration: 500
-        };
-        console.log(controlPacket);
-        sosDevice.sendControlPacket(controlPacket, function (err) {
-            if (err) {
-                console.error("Could not send SoS control packet", err);
-            }
-        });
+function getOnSuccessConfigOrDefault(startupData) {
+    if (startupData.config.onSuccess) {
+        return startupData.config.onSuccess;
+    }
+
+    return {
+        "audioPatternIndex": 1,
+        "audioDuration": 500,
+        "ledPatternIndex": 0,
+        "ledPlayDuration": 500
+    };
+}
+
+function getOnFailConfigOrDefault(startupData) {
+    if (startupData.config.onFail) {
+        return startupData.config.onFail;
+    }
+
+    return {
+        "audioPatternIndex": 0,
+        "audioDuration": 1000,
+        "ledPatternIndex": 0,
+        "ledPlayDuration": 5000
+    };
+}
+
+function getMode(patterns, patternIndex) {
+    if (patternIndex === null)
+        return null;
+    return patterns[patternIndex].id;
+}
+
+function playConfig(sosDeviceInfo, playConfig, sosDevice) {
+    var controlPacket = {
+        audioMode: getMode(sosDeviceInfo.audioPatterns, playConfig.audioPatternIndex),
+        audioPlayDuration: playConfig.audioDuration,
+        ledMode: getMode(sosDeviceInfo.ledPatterns, playConfig.ledPatternIndex),
+        ledPlayDuration: playConfig.ledPlayDuration
+    };
+    console.log(controlPacket);
+    sosDevice.sendControlPacket(controlPacket, function (err) {
+        if (err) {
+            console.error("Could not send SoS control packet", err);
+        }
+    });
+}
+
+function updateSiren(startupData, pollResult) {
+    var sosDevice = startupData.sosDevice;
+    var sosDeviceInfo = startupData.sosDeviceInfo;
+
+    if (pollResult.status === 1 /* FAILURE */) {
+        var onFailConfig = getOnFailConfigOrDefault(startupData);
+        playConfig(sosDeviceInfo, onFailConfig, sosDevice);
+    } else if (pollResult.status === 0 /* SUCCESS */) {
+        var onSuccessConfig = getOnSuccessConfigOrDefault(startupData);
+        playConfig(sosDeviceInfo, onSuccessConfig, sosDevice);
     }
 }
 
@@ -176,4 +214,4 @@ run(function (err) {
     }
     console.log("startup successful");
 });
-
+//# sourceMappingURL=sos-client.js.map
