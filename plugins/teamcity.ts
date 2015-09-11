@@ -62,16 +62,16 @@ export class TeamCity extends PluginBase.PluginBase {
     private toPollResult(response: ITeamCityResponse, config): PollResult {
         var watchedBuilds = this.getWatchedBuilds(response, config);
 
-        if (watchedBuilds.build.length === 0) {
-            return {
-                id: "AllBuildTypes",
-                status: PollResultStatus.SUCCESS
-            }
-        } else {
+        if (watchedBuilds.build && watchedBuilds.build.length > 0) {
             return {
                 id: watchedBuilds.build[0].id.toString(),
                 status: PollResultStatus.FAILURE
             }
+        }
+
+        return {
+            id: "AllBuildTypes",
+            status: PollResultStatus.SUCCESS
         }
     }
 }

@@ -62,17 +62,17 @@ var TeamCity = (function (_super) {
     TeamCity.prototype.toPollResult = function (response, config) {
         var watchedBuilds = this.getWatchedBuilds(response, config);
 
-        if (watchedBuilds.build.length === 0) {
-            return {
-                id: "AllBuildTypes",
-                status: 0 /* SUCCESS */
-            };
-        } else {
+        if (watchedBuilds.build && watchedBuilds.build.length > 0) {
             return {
                 id: watchedBuilds.build[0].id.toString(),
                 status: 1 /* FAILURE */
             };
         }
+
+        return {
+            id: "AllBuildTypes",
+            status: 0 /* SUCCESS */
+        };
     };
     return TeamCity;
 })(PluginBase.PluginBase);
